@@ -43,8 +43,8 @@ export function HistoryList({ threads: initialThreads }: HistoryListProps) {
 
   if (threads.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
+      <Card className="h-full">
+        <CardContent className="flex flex-col items-center justify-center h-full">
           <div className="rounded-full bg-muted p-4 mb-4">
             <FileText className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -52,7 +52,7 @@ export function HistoryList({ threads: initialThreads }: HistoryListProps) {
           <p className="text-muted-foreground text-center mb-6">
             Start by analyzing your first email thread to see it appear here.
           </p>
-          <Link href="/upload">
+          <Link href="/analyze">
             <Button>
               <Mail className="mr-2 h-4 w-4" />
               Analyze Email Thread
@@ -64,42 +64,44 @@ export function HistoryList({ threads: initialThreads }: HistoryListProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {threads.map((thread) => (
-        <Card key={thread.id}>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-xl mb-2">{thread.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2 flex-wrap">
-                  <span>Created {new Date(thread.created_at).toLocaleDateString()}</span>
-                  <span>•</span>
-                  <span>{new Date(thread.created_at).toLocaleTimeString()}</span>
-                </CardDescription>
+    <Card className="h-full flex flex-col">
+      <CardContent className="flex-1 overflow-auto p-6 space-y-4">
+        {threads.map((thread) => (
+          <Card key={thread.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-xl mb-2">{thread.title}</CardTitle>
+                  <CardDescription className="flex items-center gap-2 flex-wrap">
+                    <span>Created {new Date(thread.created_at).toLocaleDateString()}</span>
+                    <span>•</span>
+                    <span>{new Date(thread.created_at).toLocaleTimeString()}</span>
+                  </CardDescription>
+                </div>
+                <Badge variant="secondary">Analyzed</Badge>
               </div>
-              <Badge variant="secondary">Analyzed</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Link href={`/analysis/${thread.id}`} className="flex-1">
-                <Button variant="default" className="w-full">
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Analysis
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Link href={`/analysis/${thread.id}`} className="flex-1">
+                  <Button variant="default" className="w-full">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View Analysis
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleDelete(thread.id)}
+                  disabled={deletingId === thread.id}
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleDelete(thread.id)}
-                disabled={deletingId === thread.id}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </CardContent>
+    </Card>
   )
 }

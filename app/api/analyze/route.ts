@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { runResearchAgent } from "@/lib/research-agent"
+import { generateObject } from "ai"
+import { topicModel } from "@/lib/ai-provider"
+import { emailAnalysisSchema } from "@/lib/schemas"
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,15 +39,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save thread" }, { status: 500 })
     }
 
-    const mockAnalysis = generateMockAnalysis(content, [])
+    // Call ChatGPT to analyze the email thread
+    console.log("[ANALYSIS] Starting email analysis with ChatGPT...")
+    const analysisResult = await analyzeEmailThread(content)
+    console.log("[ANALYSIS] Analysis complete")
 
-    // Insert analysis without research
+    // Insert analysis with just the suggested reply
     const { data: analysis, error: analysisError } = await supabase
       .from("analyses")
       .insert({
         thread_id: thread.id,
         user_id: userId,
-        ...mockAnalysis,
+        suggested_reply: analysisResult.suggested_reply,
       })
       .select()
       .single()
@@ -54,12 +60,123 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to save analysis" }, { status: 500 })
     }
 
+    // Insert normalized entities in parallel
+    const insertPromises = []
+
+    if (analysisResult.stakeholders.length > 0) {
+      insertPromises.push(
+        supabase.from("stakeholders").insert(
+          analysisResult.stakeholders.map(s => ({ ...s, analysis_id: analysis.id, user_id: userId }))
+        )
+      )
+    }
+
+    if (analysisResult.action_items.length > 0) {
+      insertPromises.push(
+        supabase.from("action_items").insert(
+          analysisResult.action_items.map(a => ({ ...a, analysis_id: analysis.id, user_id: userId }))
+        )
+      )
+    }
+
+    if (analysisResult.deadlines.length > 0) {
+      insertPromises.push(
+        supabase.from("deadlines").insert(
+          analysisResult.deadlines.map(d => ({ ...d, analysis_id: analysis.id, user_id: userId }))
+        )
+      )
+    }
+
+    if (analysisResult.key_decisions.length > 0) {
+      insertPromises.push(
+        supabase.from("key_decisions").insert(
+          analysisResult.key_decisions.map(k => ({ ...k, analysis_id: analysis.id, user_id: userId }))
+        )
+      )
+    }
+
+    if (analysisResult.open_questions.length > 0) {
+      insertPromises.push(
+        supabase.from("open_questions").insert(
+          analysisResult.open_questions.map(q => ({ ...q, analysis_id: analysis.id, user_id: userId }))
+        )
+      )
+    }
+
+    // Create todos from action items
+    if (analysisResult.action_items.length > 0) {
+      insertPromises.push(
+        supabase.from("todos").insert(
+          analysisResult.action_items.map(a => ({
+            description: a.description,
+            assignee: a.assignee,
+            priority: a.priority,
+            analysis_id: analysis.id,
+            thread_id: thread.id,
+            user_id: userId,
+            completed: false,
+          }))
+        )
+      )
+    }
+
+    await Promise.all(insertPromises)
+
+    // Run research in the background (does not block response)
     runResearchInBackground(thread.id, content, userId)
 
-    return NextResponse.json({ threadId: thread.id, analysisId: analysis.id })
+    // Return the result with the ID
+    return NextResponse.json({
+      success: true,
+      threadId: thread.id,
+      analysisId: analysis.id,
+      redirectUrl: `/analysis/${thread.id}?source=analyze`
+    })
   } catch (error) {
     console.error("API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+/**
+ * Analyze an email thread using ChatGPT with strict JSON schema
+ */
+async function analyzeEmailThread(content: string) {
+  try {
+    const { object } = await generateObject({
+      model: topicModel,
+      schema: emailAnalysisSchema,
+      prompt: `You are an expert email analyst. Analyze the following email thread and extract structured information.
+
+Email Thread:
+${content}
+
+Instructions:
+1. Identify all stakeholders mentioned in the email (senders, recipients, people referenced)
+2. Extract actionable items - tasks that someone needs to complete
+3. Find any deadlines or dates mentioned
+4. Identify key decisions that were made or proposed
+5. Note any open questions that remain unanswered
+6. Generate a professional, contextual reply that addresses the main points
+
+Be thorough but only include items that are actually present in the email. If a category has no items, return an empty array for that field.
+For priorities: use "high" for urgent/time-sensitive items, "medium" for important but not urgent, "low" for nice-to-have or minor items.
+For the suggested reply, write a professional email that would be appropriate to send as a response to this thread.`,
+    })
+
+    return object
+  } catch (error) {
+    console.error("[ANALYSIS] Error analyzing email:", error instanceof Error ? error.message : error)
+
+    // Return minimal fallback if AI fails
+    return {
+      stakeholders: [],
+      action_items: [],
+      deadlines: [],
+      key_decisions: [],
+      open_questions: [],
+      suggested_reply: "Thank you for your email. I will review and respond shortly.",
+    }
   }
 }
 
@@ -85,67 +202,5 @@ async function runResearchInBackground(threadId: string, content: string, userId
     }
   } catch (error) {
     console.error("Research background error:", error)
-  }
-}
-
-function generateMockAnalysis(content: string, researchResults: any[]) {
-  const emailMatches = content.match(/[\w.-]+@[\w.-]+\.\w+/g) || []
-  const emails = [...new Set(emailMatches)]
-
-  return {
-    stakeholders: emails.slice(0, 3).map((email, idx) => ({
-      name: email.split("@")[0].replace(/[._]/g, " "),
-      email,
-      role: ["Project Manager", "Team Lead", "Developer"][idx] || "Participant",
-      evidence: "Mentioned in email headers",
-    })),
-    action_items: [
-      {
-        description: "Review the proposed changes",
-        assignee: emails[0] || "Team",
-        priority: "high" as const,
-        evidence: "Referenced in discussion",
-      },
-      {
-        description: "Schedule follow-up meeting",
-        assignee: emails[1] || "Team",
-        priority: "medium" as const,
-        evidence: "Mentioned as next step",
-      },
-      ...(researchResults.length > 0
-        ? [
-          {
-            description: `Review research findings on: ${researchResults.map((r) => r.topic).join(", ")}`,
-            assignee: emails[0] || "Team",
-            priority: "medium" as const,
-            evidence: "Topics identified for further research",
-          },
-        ]
-        : []),
-    ],
-    deadlines: [
-      {
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        description: "Review deadline",
-        evidence: "Inferred from context",
-      },
-    ],
-    key_decisions: [
-      {
-        decision: "Proceed with the proposed approach",
-        rationale: "Team consensus reached after discussion",
-        evidence: "Multiple positive responses in thread",
-      },
-    ],
-    open_questions: [
-      {
-        question: "What is the timeline for implementation?",
-        context: "Timeline needs clarification",
-        evidence: "Not explicitly addressed in thread",
-      },
-    ],
-    suggested_reply:
-      "Thank you all for the productive discussion.\n\nBased on our conversation, I understand we've agreed to proceed with the proposed approach. I'll work on reviewing the changes by next week and will schedule a follow-up meeting to discuss the implementation timeline.\n\nPlease let me know if you have any questions or concerns.\n\nBest regards",
-    research: researchResults,
   }
 }

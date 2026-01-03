@@ -27,7 +27,7 @@ export default function SignUpPage() {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
-        router.push("/upload")
+        router.push("/analyze")
       }
     }
     checkUser()
@@ -56,7 +56,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/upload`,
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/analyze`,
           data: {
             email_confirm: false,
           },
@@ -64,7 +64,7 @@ export default function SignUpPage() {
       })
       if (error) throw error
 
-      router.push("/upload")
+      router.push("/analyze")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {

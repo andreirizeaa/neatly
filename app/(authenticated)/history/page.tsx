@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { AppHeader } from "@/components/app-header"
+
 import { HistoryList } from "@/components/history-list"
 
 export default async function HistoryPage() {
@@ -26,17 +26,14 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader user={user} />
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Analysis History</h1>
-            <p className="text-muted-foreground">View and manage your past email thread analyses</p>
-          </div>
-          <HistoryList threads={threads || []} />
-        </div>
-      </main>
+    <div className="flex h-full flex-col gap-4 p-4 overflow-hidden">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Analysis History</h1>
+        <p className="text-muted-foreground">View and manage your past email thread analyses</p>
+      </div>
+      <div className="flex-1 min-h-0">
+        <HistoryList threads={threads || []} />
+      </div>
     </div>
   )
 }

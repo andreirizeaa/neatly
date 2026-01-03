@@ -7,6 +7,22 @@ export interface EmailThread {
   updated_at: string
 }
 
+export interface Todo {
+  id: string
+  user_id: string
+  analysis_id: string
+  thread_id: string
+  description: string
+  assignee?: string
+  priority: "high" | "medium" | "low"
+  due_date?: string
+  completed: boolean
+  completed_at?: string
+  created_at: string
+  // Joined fields for display
+  thread_title?: string
+}
+
 export interface Stakeholder {
   name: string
   email: string
@@ -124,7 +140,9 @@ export interface FormattedBrief {
 }
 
 export interface ResearchResult extends FormattedBrief {
+  id?: string
   isLoading?: boolean
+  status?: string
 }
 
 export interface Analysis {

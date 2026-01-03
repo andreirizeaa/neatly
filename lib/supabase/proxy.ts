@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   // Redirect to login if accessing protected routes without authentication
   if (
     !user &&
-    (request.nextUrl.pathname.startsWith("/upload") ||
+    (request.nextUrl.pathname.startsWith("/analyze") ||
       request.nextUrl.pathname.startsWith("/analysis") ||
       request.nextUrl.pathname.startsWith("/history"))
   ) {

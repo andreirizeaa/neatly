@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Sparkles } from "lucide-react"
 
 interface UploadFormProps {
@@ -141,7 +141,11 @@ Neatly Ltd`)
       }
 
       const data = await response.json()
-      router.push(`/analysis/${data.threadId}`)
+      if (data.redirectUrl) {
+        router.push(data.redirectUrl)
+      } else {
+        router.push(`/analysis/${data.threadId}?source=analyze`)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
@@ -150,13 +154,12 @@ Neatly Ltd`)
   }
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Email Thread Details</CardTitle>
-        <CardDescription>Provide a title and paste the email conversation you want to analyze</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleAnalyze} className="space-y-6">
+      <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <form onSubmit={handleAnalyze} className="space-y-6 flex-1 flex flex-col min-h-0">
           <div className="space-y-2">
             <Label htmlFor="title">Thread Title</Label>
             <Input
@@ -168,7 +171,7 @@ Neatly Ltd`)
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 flex-1 flex flex-col min-h-0 overflow-hidden">
             <Label htmlFor="content">Email Thread Content</Label>
             <Textarea
               id="content"
@@ -176,10 +179,9 @@ Neatly Ltd`)
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
-              rows={12}
-              className="font-mono text-sm"
+              className="font-mono text-sm flex-1 resize-none overflow-auto"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground shrink-0">
               Include all emails in the thread with headers (From, To, Date, Subject) for best results.
             </p>
           </div>
@@ -190,7 +192,7 @@ Neatly Ltd`)
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isAnalyzing}>
+          <Button type="submit" className="w-full shrink-0" disabled={isAnalyzing}>
             {isAnalyzing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

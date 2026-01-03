@@ -189,36 +189,100 @@ interface AnalysisViewProps {
   analysis: Analysis
 }
 
+import { ExitResearchDialog } from "./exit-research-dialog"
+import { useRouter } from "next/navigation"
+
 export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
+  const router = useRouter()
   const [copiedReply, setCopiedReply] = useState(false)
   const [research, setResearch] = useState<ResearchResult[]>(analysis.research || [])
   const [isIdentifyingTopics, setIsIdentifyingTopics] = useState(!analysis.research || analysis.research.length === 0)
+  const [isResearchInProgress, setIsResearchInProgress] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
+
+  // Track research progress to prevent navigation
+  useEffect(() => {
+    // If we're identifying topics OR any topic is currently loading
+    const anyLoading = research.some(r => r.isLoading) || isIdentifyingTopics
+    setIsResearchInProgress(anyLoading)
+
+    // Browser navigation protection (reload/close tab)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (anyLoading) {
+        e.preventDefault()
+        e.returnValue = "" // Chrome requires returnValue to be set
+      }
+    }
+
+    if (anyLoading) {
+      window.addEventListener("beforeunload", handleBeforeUnload)
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [research, isIdentifyingTopics])
+
+  const handleNavigationAttempt = (path: string) => {
+    if (isResearchInProgress) {
+      setPendingNavigation(path)
+      setShowExitDialog(true)
+    } else {
+      router.push(path)
+    }
+  }
+
+  const confirmExit = () => {
+    setShowExitDialog(false)
+    if (pendingNavigation) {
+      router.push(pendingNavigation)
+    }
+  }
+
+  const cancelExit = () => {
+    setShowExitDialog(false)
+    setPendingNavigation(null)
+  }
 
   useEffect(() => {
     // If we already have research results, don't trigger the process again
     if (analysis.research && analysis.research.length > 0) {
       console.log("Using cached research results from database")
+      setResearch(analysis.research)
+      setIsIdentifyingTopics(false)
       return
     }
 
     const identifyTopics = async () => {
       try {
-        const response = await fetch(`/api/research/topics/${analysis.id}`)
+        // 1. Identify Topics
+        const response = await fetch("/api/research/identify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            analysisId: analysis.id,
+            emailContent: thread.content,
+          }),
+        })
+
         const data = await response.json()
 
         if (data.topics && data.topics.length > 0) {
-          // Set topics with loading state
+          // Set all topics initially (all will show as loading)
           setResearch(data.topics)
           setIsIdentifyingTopics(false)
 
-          data.topics.forEach(async (topicItem: ResearchResult) => {
+          // 2. Process each topic sequentially
+          for (const topicItem of data.topics) {
             try {
-              const researchResponse = await fetch("/api/research/topic", {
+              const researchResponse = await fetch("/api/research/process", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   analysisId: analysis.id,
                   topic: topicItem.topic,
+                  topicId: topicItem.id, // Send the ID
                   context: "Email thread analysis",
                   emailContent: thread.content,
                 }),
@@ -226,14 +290,18 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
 
               const researchData = await researchResponse.json()
 
-              // Update this specific topic with results
-              setResearch((prev) =>
-                prev.map((item) =>
-                  item.topic === topicItem.topic ? { ...researchData.result, isLoading: false } : item,
-                ),
-              )
+              if (researchData.success && researchData.result) {
+                // Update this specific topic with results
+                setResearch((prev) =>
+                  prev.map((item) =>
+                    item.topic === topicItem.topic ? { ...researchData.result, isLoading: false } : item,
+                  ),
+                )
+              } else {
+                throw new Error("Research failed")
+              }
             } catch (error) {
-              console.error("Error researching topic:", topicItem.topic, error)
+              console.error("Error processing topic:", topicItem.topic, error)
               // Mark as failed
               setResearch((prev) =>
                 prev.map((item) =>
@@ -251,12 +319,12 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
                 ),
               )
             }
-          })
+          }
         } else {
           setIsIdentifyingTopics(false)
         }
       } catch (error) {
-        console.error("Error identifying topics:", error)
+        console.error("Error identifying/processing research:", error)
         setIsIdentifyingTopics(false)
       }
     }
@@ -271,18 +339,12 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">{thread.title}</h1>
-          <p className="text-sm text-muted-foreground">
-            Analyzed on {new Date(analysis.created_at).toLocaleDateString()}
-          </p>
-        </div>
-        <Link href="/history">
-          <Button variant="outline">View History</Button>
-        </Link>
-      </div>
+    <div className="space-y-6">
+      <ExitResearchDialog
+        isOpen={showExitDialog}
+        onConfirm={confirmExit}
+        onCancel={cancelExit}
+      />
 
       {/* Research Findings */}
       <Card className="border-primary/50 bg-primary/5">
