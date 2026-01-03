@@ -8,7 +8,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'Neatly',
-  description: 'Created with for SDL',
+  description: 'Created for SDL',
   icons: {
     icon: [
       {
