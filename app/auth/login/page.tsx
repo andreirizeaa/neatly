@@ -26,7 +26,7 @@ export default function LoginPage() {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
-        router.push("/new")
+        router.push("/home")
       }
     }
     checkUser()
@@ -45,7 +45,7 @@ export default function LoginPage() {
 
       })
       if (error) throw error
-      router.push("/new")
+      router.push("/home")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -61,7 +61,7 @@ export default function LoginPage() {
             <BrandLogo className="w-32 h-10" />
           </div>
           <Card>
-            <CardHeader>
+            <CardHeader className="text-center">
               <CardTitle className="text-2xl">Welcome Back</CardTitle>
               <CardDescription>Enter your credentials to access your account</CardDescription>
             </CardHeader>

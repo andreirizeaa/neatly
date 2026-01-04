@@ -27,7 +27,7 @@ export default function SignUpPage() {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
-        router.push("/new")
+        router.push("/home")
       }
     }
     checkUser()
@@ -56,7 +56,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/new`,
+          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/home`,
           data: {
             email_confirm: false,
           },
@@ -64,7 +64,7 @@ export default function SignUpPage() {
       })
       if (error) throw error
 
-      router.push("/new")
+      router.push("/home")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -80,7 +80,7 @@ export default function SignUpPage() {
             <BrandLogo className="w-32 h-10" />
           </div>
           <Card>
-            <CardHeader>
+            <CardHeader className="text-center">
               <CardTitle className="text-2xl">Create Your Account</CardTitle>
               <CardDescription>Get started with Neatly and organize your emails</CardDescription>
             </CardHeader>
