@@ -12,7 +12,7 @@ interface BrandLogoProps {
 }
 
 export function BrandLogo({ className, height = 40, width = 120 }: BrandLogoProps) {
-    const { theme } = useTheme()
+    const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -26,7 +26,7 @@ export function BrandLogo({ className, height = 40, width = 120 }: BrandLogoProp
     return (
         <div className={cn("relative", className)} style={{ height, width }}>
             <Image
-                src={theme === "dark" ? "/neatly-logo-app-dark.png" : "/neatly-logo-app.png"}
+                src={resolvedTheme === "dark" ? "/neatly-logo-app-dark.png" : "/neatly-logo-app.png"}
                 alt="Neatly"
                 fill
                 className="object-contain object-left"

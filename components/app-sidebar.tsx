@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun, Calendar } from "lucide-react"
+import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun, Calendar, Monitor, ChevronUp } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
@@ -18,6 +18,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
 
@@ -27,7 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const source = searchParams.get("source")
   const router = useRouter()
   const { toggleSidebar, state } = useSidebar()
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const isCollapsed = state === "collapsed"
   const [mounted, setMounted] = useState(false)
 
@@ -51,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="flex w-full items-center justify-between">
           {!isCollapsed && (
             <div className="relative h-10 w-32">
-              <Image src={mounted && theme === "dark" ? "/neatly-logo-app-dark.png" : "/neatly-logo-app.png"} alt="Neatly" fill className="object-contain object-left" />
+              <Image src={mounted && resolvedTheme === "dark" ? "/neatly-logo-app-dark.png" : "/neatly-logo-app.png"} alt="Neatly" fill className="object-contain object-left" />
             </div>
           )}
           <button
@@ -133,15 +139,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="p-2 gap-1">
         <SidebarMenu className="gap-1">
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              tooltip={mounted && theme === "dark" ? "Light Mode" : "Dark Mode"}
-              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            >
-              <Sun className="size-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute size-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span>{mounted && theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  tooltip="Theme"
+                  className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
+                  <Sun className="size-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute size-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span>
+                    {mounted ? (theme === "dark" ? "Dark" : theme === "light" ? "Light" : "System") : "Theme"}
+                  </span>
+                  <ChevronUp className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                align="start"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56"
+              >
+                <DropdownMenuItem onClick={() => setTheme("light")} className="gap-2">
+                  <Sun className="size-4" />
+                  <span>Light</span>
+                  {theme === "light" && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")} className="gap-2">
+                  <Moon className="size-4" />
+                  <span>Dark</span>
+                  {theme === "dark" && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")} className="gap-2">
+                  <Monitor className="size-4" />
+                  <span>System</span>
+                  {theme === "system" && <span className="ml-auto text-xs text-muted-foreground">✓</span>}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
