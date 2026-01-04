@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import { Mail } from "lucide-react"
+import { BrandLogo } from "@/components/brand-logo"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -26,7 +26,7 @@ export default function LoginPage() {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
-        router.push("/analyze")
+        router.push("/new")
       }
     }
     checkUser()
@@ -45,7 +45,7 @@ export default function LoginPage() {
 
       })
       if (error) throw error
-      router.push("/analyze")
+      router.push("/new")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -54,12 +54,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6 bg-muted/50">
+    <div className="flex min-h-screen w-full items-center justify-center p-6 bg-sidebar dark:bg-[#111827]">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Mail className="h-6 w-6 text-primary" />
-            <span className="text-xl font-semibold">Neatly</span>
+          <div className="flex items-center justify-center mb-4">
+            <BrandLogo className="w-32 h-10" />
           </div>
           <Card>
             <CardHeader>

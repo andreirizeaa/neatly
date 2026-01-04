@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Mail, Users, Calendar, CheckCircle2, MessageSquare, FileText, ArrowRight, Sparkles } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { BrandLogo } from "@/components/brand-logo"
 
 export default async function LandingPage() {
   const supabase = await createClient()
@@ -12,18 +13,17 @@ export default async function LandingPage() {
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/analyze")
+    redirect("/new")
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-sidebar dark:bg-[#111827]">
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Mail className="h-6 w-6 text-primary" />
-            <span className="text-xl font-semibold">Neatly</span>
-          </div>
+          <Link href="/">
+            <BrandLogo className="w-32 h-8" />
+          </Link>
           <nav className="flex items-center gap-4">
             <Link href="/auth/login">
               <Button variant="ghost">Login</Button>

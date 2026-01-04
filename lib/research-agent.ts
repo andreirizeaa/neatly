@@ -13,7 +13,7 @@ export async function identifyResearchTopics(emailContent: string): Promise<Arra
     const { object } = await generateObject({
       model: topicModel,
       schema: researchTopicSchema,
-      prompt: `Analyze the following email thread and identify 3-5 HIGHLY SPECIFIC research topics or questions.
+      prompt: `Analyze the following email thread and identify MAXIMUM 5 HIGHLY SPECIFIC research topics or questions.
       
 Email thread:
 ${emailContent}
@@ -21,7 +21,8 @@ ${emailContent}
 Return only a flat list of highly relevant, granular research queries.`,
     })
 
-    return object.topics.map(t => ({
+    // Enforce hard cap of 5 topics
+    return object.topics.slice(0, 5).map(t => ({
       topic: t,
       context: "Topic identified from thread analysis",
       priority: "high" as const
@@ -103,12 +104,41 @@ export async function runResearchAgent(emailContent: string) {
   console.log(`[AGENT] Processing ${topics.length} topics concurrently...`)
 
   // Research high priority topics (up to 5)
-  const researchPromises = topics
+  const results = []
+  const highPriorityTopics = topics
     .filter((t) => t.priority === "high")
     .slice(0, 5)
-    .map((topic) => researchSingleTopic(topic.topic, topic.context, emailContent))
 
-  const results = await Promise.all(researchPromises)
+  // Execute serially to avoid rate limits
+  for (const topic of highPriorityTopics) {
+    try {
+      const result = await researchSingleTopic(topic.topic, topic.context, emailContent)
+      results.push(result)
+
+      // Small delay between requests to be safe
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } catch (e) {
+      console.error(`[AGENT] Failed to process topic ${topic.topic}`, e)
+      // Add error result so UI shows it failed
+      results.push({
+        schema_version: "1.0.0",
+        title: `Research: ${topic.topic}`,
+        tldr: ["Research could not be completed."],
+        sections: [
+          {
+            id: "error",
+            kind: "custom",
+            title: "Status",
+            blocks: [
+              { type: "callout", callout_kind: "risk", text: "An error occurred. Please retry." }
+            ]
+          }
+        ],
+        sources: [],
+        topic: topic.topic,
+      })
+    }
+  }
 
   console.log(`[AGENT] Research cycle completed with ${results.length} results`)
 

@@ -75,6 +75,7 @@ const contentFormattingAgent = new Agent({
 Output requirement
 Output ONLY valid JSON that matches the FormattedBrief schema (below).
 No Markdown. No code fences. No commentary. No extra keys.
+NEVER use "/" as a placeholder value for empty fields. Use an empty string "" or omit the field if optional.
 Hard rules
 No new facts
 Only rephrase, reorganize, deduplicate, and clarify what’s present in the research text.
@@ -116,7 +117,7 @@ numbers (table if possible; else bullets)
 pros_cons (two bullets lists + tradeoffs)
 risks_mitigations (reliability + privacy/security + mitigations)
 recommendations (prioritized, action-oriented)
-faq (Q/A from open questions + common confusion)
+faq (Q/A pairs - IMPORTANT: for each question, you MUST provide a meaningful answer based on the research. If the research doesn't answer it directly, synthesize an answer from related information or note it's unclear. Empty answers are NOT allowed.)
 Step E — Recommendations (must be actionable)
 Produce 5–10 next steps.
 Prefer verbs: “Define…”, “Measure…”, “Add…”, “Restrict…”
@@ -153,7 +154,7 @@ Only use that if you truly cannot extract any content.`,
     modelSettings: {
         temperature: 1,
         topP: 1,
-        maxTokens: 2048,
+        maxTokens: 8192,
     }
 });
 

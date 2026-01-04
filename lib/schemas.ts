@@ -129,6 +129,9 @@ export const emailAnalysisSchema = z.object({
     deadlines: z.array(deadlineSchema).describe("Any dates or deadlines mentioned"),
     key_decisions: z.array(keyDecisionSchema).describe("Decisions that were made in the thread"),
     open_questions: z.array(openQuestionSchema).describe("Questions that remain unanswered"),
-    suggested_reply: z.string().describe("A professional, contextual reply email that addresses the key points"),
+    suggested_replies: z.array(z.object({
+        title: z.string().describe("Short title for this reply option (e.g., 'Polite Decline', 'Enthusiastic Acceptance')"),
+        content: z.string().describe("The full email body text"),
+    })).describe("3 distinct reply options with different tones or approaches"),
 })
 

@@ -32,9 +32,10 @@ export async function updateSession(request: NextRequest) {
   // Redirect to login if accessing protected routes without authentication
   if (
     !user &&
-    (request.nextUrl.pathname.startsWith("/analyze") ||
+    (request.nextUrl.pathname.startsWith("/new") ||
       request.nextUrl.pathname.startsWith("/analysis") ||
-      request.nextUrl.pathname.startsWith("/history"))
+      request.nextUrl.pathname.startsWith("/calendar") ||
+      request.nextUrl.pathname.startsWith("/todos"))
   ) {
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"

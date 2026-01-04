@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun } from "lucide-react"
+import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun, Calendar } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
@@ -36,8 +36,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
 
   // Determine active state
-  const isAnalyzeActive = pathname.startsWith("/analyze") || (pathname.startsWith("/analysis/") && source === "analyze")
-  const isHistoryActive = pathname.startsWith("/history") || (pathname.startsWith("/analysis/") && source !== "analyze")
+  const isNewThreadActive = pathname.startsWith("/new")
+  const isAnalysisActive = pathname.startsWith("/analysis")
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -75,13 +75,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={isAnalyzeActive}
-              tooltip="Analyze"
+              isActive={isNewThreadActive}
+              tooltip="New Thread"
               className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
-              <Link href="/analyze">
+              <Link href="/new">
                 <MailPlus className="size-[18px]" />
-                <span>Analyze</span>
+                <span>New Thread</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -89,13 +89,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={isHistoryActive}
-              tooltip="History"
+              isActive={pathname.startsWith("/calendar")}
+              tooltip="Calendar"
               className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
-              <Link href="/history">
-                <History className="size-[18px]" />
-                <span>History</span>
+              <Link href="/calendar">
+                <Calendar className="size-[18px]" />
+                <span>Calendar</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -110,6 +110,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/todos">
                 <CheckSquare className="size-[18px]" />
                 <span>To Do</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={isAnalysisActive}
+              tooltip="Analysis"
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
+            >
+              <Link href="/analysis">
+                <History className="size-[18px]" />
+                <span>Analysis</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
