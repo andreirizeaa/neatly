@@ -1,9 +1,11 @@
 "use client"
 
-import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn } from "lucide-react"
+import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 import {
   Sidebar,
@@ -25,7 +27,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const source = searchParams.get("source")
   const router = useRouter()
   const { toggleSidebar, state } = useSidebar()
+  const { theme, setTheme } = useTheme()
   const isCollapsed = state === "collapsed"
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Determine active state
   const isAnalyzeActive = pathname.startsWith("/analyze") || (pathname.startsWith("/analysis/") && source === "analyze")
@@ -38,17 +46,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar collapsible="icon" {...props} className="border-r border-border bg-[#FDFDFD]">
+    <Sidebar collapsible="icon" {...props} className="border-r border-sidebar-border bg-sidebar dark:bg-[#111827]">
       <SidebarHeader className="h-[60px] flex items-center justify-between px-4 pt-4 pb-0">
         <div className="flex w-full items-center justify-between">
           {!isCollapsed && (
             <div className="relative h-10 w-32">
-              <Image src="/neatly-logo-app.png" alt="Neatly" fill className="object-contain object-left" />
+              <Image src={mounted && theme === "dark" ? "/neatly-logo-app-dark.png" : "/neatly-logo-app.png"} alt="Neatly" fill className="object-contain object-left" />
             </div>
           )}
           <button
             onClick={toggleSidebar}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-foreground/70 hover:bg-black/5 hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
             <PanelLeft className="h-[22px] w-[22px]" />
             <span className="sr-only">Toggle Sidebar</span>
@@ -59,7 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="px-2 py-2">
         <SidebarMenu className="gap-1">
           {!isCollapsed && (
-            <div className="px-2 py-1.5 text-[0.7rem] font-medium uppercase tracking-wider text-muted-foreground/70">
+            <div className="px-2 py-1.5 text-[0.7rem] font-medium uppercase tracking-wider text-sidebar-foreground/60">
               Menu
             </div>
           )}
@@ -69,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               isActive={isAnalyzeActive}
               tooltip="Analyze"
-              className="h-9 px-2 text-[0.9rem] font-normal text-foreground/80 hover:bg-black/5 hover:text-foreground data-[active=true]:bg-[#E8F0FE] data-[active=true]:font-medium data-[active=true]:text-[#1a73e8]"
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
               <Link href="/analyze">
                 <MailPlus className="size-[18px]" />
@@ -83,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               isActive={isHistoryActive}
               tooltip="History"
-              className="h-9 px-2 text-[0.9rem] font-normal text-foreground/80 hover:bg-black/5 hover:text-foreground data-[active=true]:bg-[#E8F0FE] data-[active=true]:font-medium data-[active=true]:text-[#1a73e8]"
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
               <Link href="/history">
                 <History className="size-[18px]" />
@@ -97,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               isActive={pathname.startsWith("/todos")}
               tooltip="To Do"
-              className="h-9 px-2 text-[0.9rem] font-normal text-foreground/80 hover:bg-black/5 hover:text-foreground data-[active=true]:bg-[#E8F0FE] data-[active=true]:font-medium data-[active=true]:text-[#1a73e8]"
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
               <Link href="/todos">
                 <CheckSquare className="size-[18px]" />
@@ -112,9 +120,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu className="gap-1">
           <SidebarMenuItem>
             <SidebarMenuButton
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              tooltip={mounted && theme === "dark" ? "Light Mode" : "Dark Mode"}
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <Sun className="size-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute size-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span>{mounted && theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
               onClick={handleSignOut}
               tooltip="Sign Out"
-              className="h-9 px-2 text-[0.9rem] font-normal text-foreground/80 hover:bg-black/5 hover:text-foreground"
+              className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
               <LogOut className="size-[18px]" />
               <span>Sign Out</span>
