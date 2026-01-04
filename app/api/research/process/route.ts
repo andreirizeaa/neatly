@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
         topicId = body.topicId
 
         if (!analysisId || !topic || !topicId || !emailContent) {
+            console.error("[RESEARCH_PROCESS] Missing fields:", {
+                hasAnalysisId: !!analysisId,
+                hasTopic: !!topic,
+                hasTopicId: !!topicId,
+                hasEmailContent: !!emailContent
+            })
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 },
@@ -48,7 +54,7 @@ export async function POST(req: NextRequest) {
             .upsert({
                 analysis_id: analysisId,
                 topic_id: topicId,
-                user_id: user.id, // Add user_id
+                user_id: user.id,
                 content: result,
                 status: "completed",
                 updated_at: new Date().toISOString(),
@@ -56,6 +62,16 @@ export async function POST(req: NextRequest) {
 
         if (updateError) {
             console.error(`[RESEARCH_PROCESS] Failed to update DB for topic "${topic}":`, updateError)
+        }
+
+        // Update the topic's is_loading state to false
+        const { error: topicUpdateError } = await supabase
+            .from("research_topics")
+            .update({ is_loading: false })
+            .eq("id", topicId)
+
+        if (topicUpdateError) {
+            console.error(`[RESEARCH_PROCESS] Failed to update is_loading for topic "${topic}":`, topicUpdateError)
         }
 
         return NextResponse.json({

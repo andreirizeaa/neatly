@@ -24,15 +24,15 @@ export function AppHeader({ user }: AppHeaderProps) {
     <header className="border-b bg-background">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/analyze" className="flex items-center gap-2">
+          <Link href="/new" className="flex items-center gap-2">
             <Mail className="h-6 w-6 text-primary" />
             <span className="text-xl font-semibold">Neatly</span>
           </Link>
           <nav className="hidden md:flex items-center gap-4">
-            <Link href="/analyze">
+            <Link href="/new">
               <Button variant="ghost">Analyze</Button>
             </Link>
-            <Link href="/history">
+            <Link href="/analysis">
               <Button variant="ghost">History</Button>
             </Link>
           </nav>

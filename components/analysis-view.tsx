@@ -18,7 +18,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react"
 import type { EmailThread, Analysis, ResearchResult, Block, Source, Citation } from "@/lib/types"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 
 function CitationBadge({ citationId, sources }: { citationId: string; sources: Source[] }) {
@@ -245,6 +245,9 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
     setPendingNavigation(null)
   }
 
+  // Ref to prevent double-execution from React Strict Mode
+  const hasStartedIdentifyRef = useRef(false)
+
   useEffect(() => {
     // If we already have research results, don't trigger the process again
     if (analysis.research && analysis.research.length > 0) {
@@ -253,6 +256,12 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
       setIsIdentifyingTopics(false)
       return
     }
+
+    // Prevent duplicate calls from React Strict Mode double-mounting
+    if (hasStartedIdentifyRef.current) {
+      return
+    }
+    hasStartedIdentifyRef.current = true
 
     const identifyTopics = async () => {
       try {
@@ -333,9 +342,11 @@ export function AnalysisView({ thread, analysis }: AnalysisViewProps) {
   }, [thread.id, thread.content])
 
   const copyReply = async () => {
-    await navigator.clipboard.writeText(analysis.suggested_reply)
-    setCopiedReply(true)
-    setTimeout(() => setCopiedReply(false), 2000)
+    if (analysis.suggested_reply) {
+      await navigator.clipboard.writeText(analysis.suggested_reply)
+      setCopiedReply(true)
+      setTimeout(() => setCopiedReply(false), 2000)
+    }
   }
 
   return (

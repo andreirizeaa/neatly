@@ -145,6 +145,11 @@ export interface ResearchResult extends FormattedBrief {
   status?: string
 }
 
+export interface SuggestedReply {
+  title: string
+  content: string
+}
+
 export interface Analysis {
   id: string
   thread_id: string
@@ -154,7 +159,8 @@ export interface Analysis {
   deadlines: Deadline[]
   key_decisions: KeyDecision[]
   open_questions: OpenQuestion[]
-  suggested_reply: string
+  suggested_reply?: string // Legacy field
+  suggested_replies?: SuggestedReply[]
   research?: ResearchResult[]
   created_at: string
 }
