@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun, Calendar, Monitor, ChevronUp } from "lucide-react"
+import { Mail, LogOut, Upload, History, PanelLeft, Settings, Info, ArrowLeftRight, Search, MailPlus, CheckSquare, ChartColumn, Moon, Sun, Calendar, Monitor, ChevronUp, Home } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
@@ -42,7 +42,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
 
   // Determine active state
-  const isNewThreadActive = pathname.startsWith("/new")
   const isAnalysisActive = pathname.startsWith("/analysis")
 
   const handleSignOut = async () => {
@@ -81,13 +80,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              isActive={isNewThreadActive}
-              tooltip="New Thread"
+              isActive={pathname.startsWith("/home")}
+              tooltip="Home"
               className="h-9 px-2 text-[0.9rem] font-normal text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-primary"
             >
-              <Link href="/new">
-                <MailPlus className="size-[18px]" />
-                <span>New Thread</span>
+              <Link href="/home">
+                <Home className="size-[18px]" />
+                <span>Home</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

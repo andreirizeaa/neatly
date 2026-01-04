@@ -534,15 +534,15 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
                 </div>
 
                 {/* Right Column - Summary & Reply */}
-                <div className="flex flex-col h-full space-y-4 overflow-hidden">
+                <div className="flex flex-col h-full gap-3 overflow-hidden">
                     {/* Summary Grid */}
-                    <div className="grid grid-cols-2 gap-3 h-full">
+                    <div className="grid grid-cols-2 grid-rows-2 gap-3 flex-[4] min-h-0 overflow-hidden">
                         {/* Stakeholders Card */}
                         <Card
-                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group"
+                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group overflow-hidden"
                             onClick={() => analysis.stakeholders.length > 0 && setShowStakeholdersDialog(true)}
                         >
-                            <CardContent className="p-4 flex flex-col h-full justify-between">
+                            <CardContent className="p-4 flex flex-col h-full justify-between overflow-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                                         <Users className="h-4 w-4 text-primary" />
@@ -560,10 +560,10 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
 
                         {/* Action Items Card */}
                         <Card
-                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group"
+                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group overflow-hidden"
                             onClick={() => analysis.action_items.length > 0 && setShowActionItemsDialog(true)}
                         >
-                            <CardContent className="p-4 flex flex-col h-full justify-between">
+                            <CardContent className="p-4 flex flex-col h-full justify-between overflow-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                                         <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -588,10 +588,10 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
 
                         {/* Deadlines Card */}
                         <Card
-                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group"
+                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group overflow-hidden"
                             onClick={() => analysis.deadlines.length > 0 && setShowDeadlinesDialog(true)}
                         >
-                            <CardContent className="p-4 flex flex-col h-full justify-between">
+                            <CardContent className="p-4 flex flex-col h-full justify-between overflow-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                                         <Calendar className="h-4 w-4 text-primary" />
@@ -616,10 +616,10 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
 
                         {/* Questions Card */}
                         <Card
-                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group"
+                            className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group overflow-hidden"
                             onClick={() => analysis.open_questions.length > 0 && setShowQuestionsDialog(true)}
                         >
-                            <CardContent className="p-4 flex flex-col h-full justify-between">
+                            <CardContent className="p-4 flex flex-col h-full justify-between overflow-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                                         <AlertCircle className="h-4 w-4 text-primary" />
@@ -645,10 +645,10 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
 
                     {/* Suggested Reply Card */}
                     <Card
-                        className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group col-span-2"
+                        className="cursor-pointer hover:bg-muted/50 transition-all border shadow-sm group flex-1 min-h-0"
                         onClick={() => setShowSuggestedReplyDialog(true)}
                     >
-                        <CardContent className="p-4 flex flex-col h-full justify-between">
+                        <CardContent className="p-4 flex flex-col h-full justify-between overflow-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                                     <Mail className="h-4 w-4 text-primary" />
@@ -671,7 +671,7 @@ export function AnalysisDashboard({ thread, analysis }: AnalysisDashboardProps) 
             </div>
 
             {/* Full Width Original Thread Bar */}
-            <div className="flex-none p-1 bg-background">
+            <div className="flex-none bg-background">
                 <div
                     className="w-full bg-card hover:bg-muted/50 border rounded-lg shadow-sm transition-all cursor-pointer group py-3 px-4 flex items-center justify-between"
                     onClick={() => setShowOriginalThreadDialog(true)}

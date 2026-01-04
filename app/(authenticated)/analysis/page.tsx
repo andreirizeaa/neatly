@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { MailPlus } from "lucide-react"
 
 import { HistoryList } from "@/components/history-list"
 
@@ -27,9 +30,17 @@ export default async function HistoryPage() {
 
   return (
     <div className="flex h-full flex-col gap-4 p-4 overflow-hidden">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Analysis History</h1>
-        <p className="text-muted-foreground">View and manage your past email thread analyses</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Analysis History</h1>
+          <p className="text-muted-foreground">View and manage your past email thread analyses</p>
+        </div>
+        <Link href="/new">
+          <Button className="gap-2">
+            <MailPlus className="h-4 w-4" />
+            New Analysis
+          </Button>
+        </Link>
       </div>
       <div className="flex-1 min-h-0">
         <HistoryList threads={threads || []} />

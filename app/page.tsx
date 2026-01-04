@@ -13,7 +13,7 @@ export default async function LandingPage() {
   } = await supabase.auth.getUser()
 
   if (user) {
-    redirect("/new")
+    redirect("/home")
   }
 
   return (
